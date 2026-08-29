@@ -3,6 +3,8 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.core.exceptions import ValidationError
+from django.conf import settings
+import requests
 
 # Importações necessárias para o cache
 from django.utils.decorators import method_decorator
@@ -13,17 +15,12 @@ from .serializers import GiftSerializer, ReserveGiftSerializer
 from .services import reserve_gift
 
 class GiftListCreateView(generics.ListCreateAPIView):
-    """
-    GET: Lista todos os presentes (com suporte a ordenação por preço).
-    POST: Cria um novo presente usando o GiftSerializer.
-    """
     queryset = Gift.objects.all()
     serializer_class = GiftSerializer
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ['price']
     ordering = ['price']
 
-    # Adicionando cache de 60 segundos apenas na requisição GET (Listagem)
     @method_decorator(cache_page(60)) 
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
@@ -35,6 +32,22 @@ class ReserveGiftView(APIView):
     parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request, gift_id):
+        turnstile_token = request.data.get('turnstile_token')
+        
+        if not turnstile_token:
+            return Response({"erro": "Validação de segurança ausente."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Verifica com o Cloudflare se é humano
+        verify_url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify'
+        cloudflare_response = requests.post(verify_url, data={
+            'secret': settings.TURNSTILE_SECRET_KEY,
+            'response': turnstile_token,
+        }).json()
+
+        if not cloudflare_response.get('success'):
+            return Response({"erro": "Falha na verificação de robô."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # O código segue normalmente se for humano
         serializer = ReserveGiftSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
