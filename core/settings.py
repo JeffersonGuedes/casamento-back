@@ -121,3 +121,4 @@ MEDIA_ROOT = BASE_DIR / 'media'
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['rest_framework.filters.OrderingFilter'],
 }
+CONN_MAX_AGE = 60

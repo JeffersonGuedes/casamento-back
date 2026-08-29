@@ -47,4 +47,4 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 EXPOSE 8000
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py collectstatic --noinput && gunicorn --bind 0.0.0.0:8000 --workers 3 core.wsgi:application"]
+CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py collectstatic --noinput && gunicorn --bind 0.0.0.0:8000 --workers 3 --threads 4 --worker-class gthread core.wsgi:application"]
