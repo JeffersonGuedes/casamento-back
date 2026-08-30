@@ -32,22 +32,7 @@ class ReserveGiftView(APIView):
     parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request, gift_id):
-        turnstile_token = request.data.get('turnstile_token')
         
-        if not turnstile_token:
-            return Response({"erro": "Validação de segurança ausente."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Verifica com o Cloudflare se é humano
-        verify_url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify'
-        cloudflare_response = requests.post(verify_url, data={
-            'secret': settings.TURNSTILE_SECRET_KEY,
-            'response': turnstile_token,
-        }).json()
-
-        if not cloudflare_response.get('success'):
-            return Response({"erro": "Falha na verificação de robô."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # O código segue normalmente se for humano
         serializer = ReserveGiftSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
