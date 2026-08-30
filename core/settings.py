@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from decouple import Csv, config
 import dj_database_url
+from csp.constants import SELF, UNSAFE_INLINE, UNSAFE_EVAL, NONE
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -18,12 +19,16 @@ SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=False, cast=bool)
 SESSION_COOKIE_SECURE = config('SESSION_COOKIE_SECURE', default=False, cast=bool)
 CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', default=False, cast=bool)
 
-CSP_DEFAULT_SRC = ("'self'",)
-CSP_STYLE_SRC = ("'self'", "'unsafe-inline'")
-CSP_SCRIPT_SRC = ("'self'", "'unsafe-inline'", "'unsafe-eval'")
-CSP_IMG_SRC = ("'self'", "data:")
-CSP_FONT_SRC = ("'self'",)
-CSP_FRAME_ANCESTORS = ("'none'",)
+CONTENT_SECURITY_POLICY = {
+    "DIRECTIVES": {
+        "default-src": [SELF],
+        "style-src": [SELF, UNSAFE_INLINE],
+        "script-src": [SELF, UNSAFE_INLINE, UNSAFE_EVAL],
+        "img-src": [SELF, "data:"],
+        "font-src": [SELF],
+        "frame-ancestors": [NONE],
+    }
+}
 
 INSTALLED_APPS = [
     'django.contrib.admin',
