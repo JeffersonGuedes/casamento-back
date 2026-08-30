@@ -37,6 +37,7 @@ class ReserveGiftSerializer(serializers.Serializer):
     buyer_email = serializers.EmailField()
     payment_proof_type = serializers.ChoiceField(choices=Gift.PAYMENT_PROOF_CHOICES)
     payment_proof_file = serializers.FileField()
+    description = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
     def validate_payment_proof_file(self, value):
         allowed_content_types = {'application/pdf'}
