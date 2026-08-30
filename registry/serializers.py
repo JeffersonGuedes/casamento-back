@@ -40,9 +40,9 @@ class ReserveGiftSerializer(serializers.Serializer):
 
     def validate_payment_proof_file(self, value):
         allowed_content_types = {'application/pdf'}
-        content_type = getattr(value, 'content_type', '')
+        content_type = getattr(value, 'content_type', '') or ''
 
-        if content_type and (content_type in allowed_content_types or content_type.startswith('image/')):
+        if content_type in allowed_content_types or content_type.startswith('image/'):
             return value
 
         raise serializers.ValidationError('Envie um arquivo PDF ou imagem para o comprovante.')
